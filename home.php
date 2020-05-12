@@ -1,9 +1,6 @@
 <?php
     include('parts/head.php');
 ?>
-<div class="row">
-    
-</div>
 
 
 <?php

@@ -9,17 +9,14 @@
         <title>ADMIN</title>
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
         <link rel="stylesheet" href="assets/css/main.css">
-        <link rel="stylesheet" href="assets/css/simple-grid.min.css">
+        <link rel="stylesheet" href="assets/css/bootstrap-grid.min.css">
     </head>
     <body class="navHidden">
         <nav>
             <ul>
                 <li><a href="home.php"><i class="fas fa-columns"></i>Dasboard</a></li>
-                <li><a href="#"><i class="fas fa-columns"></i>Dasboard</a></li>
-                <li><a href="#"><i class="fas fa-columns"></i>Dasboard</a></li>
-                <li><a href="#"><i class="fas fa-columns"></i>Dasboard</a></li>
-                <li><a href="#"><i class="fas fa-columns"></i>Dasboard</a></li>
-                <li><a href="#"><i class="fas fa-columns"></i>Dasboard</a></li>
+                <li><a href="articles.php"><i class="fas fa-th-list"></i>Articles</a></li>
+                
             </ul>
         </nav>
         <header>
