@@ -335,3 +335,9 @@ header .headerRight>li>a:hover svg path{
     padding: 20px 15px;
     background-color: var(--lighter-border-color);
 }
+
+.section-heading{
+    display: inline-block;
+    margin-right: 1vw;
+    margin-bottom:1vw;
+}

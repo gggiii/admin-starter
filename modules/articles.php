@@ -9,6 +9,7 @@ class Articles{
             //SETUP
             $this->tableName = 'articles'; //table name in database
             $this->editPrefix = 'editTest';
+            $this->articlesPage = 'articles.php';
             $this->tableSetup = array(
                 'id'=>array(
                     "type"=>'nochange'
@@ -24,9 +25,7 @@ class Articles{
                     'additional'=>array('ckeditor')
                 ),
                 'date'=>array(
-                    "type"=>'simple',
-                    "input"=>'text',
-                    "size"=>40
+                    "type"=>'nochange'
                 ),
                 'tags'=>array(
                     "type"=>'array',
@@ -43,7 +42,7 @@ class Articles{
             );
             $this->tableActions = '
                 <a href="?action=edit&id={{{id}}}" class="btn btn-blue">Edit</a>
-                <a href="#" class="btn btn-red"">Action</a>
+                <a href="?action=delete&id={{{id}}}" class="btn btn-red"">Action</a>
             ';
         }
         function getTable(string $fields, string $where = ''){
@@ -197,6 +196,105 @@ class Articles{
             $query .= " where id={$id}";
             if($this->db->query($query, $updateData)){
                 return true;
+            }
+        }
+
+        function getAdd(){
+            $workingFields = array();
+            //GET FIELDS WHICH WILL BE EDITED
+            
+            foreach($this->tableSetup as $key=>$fieldVal){
+                if($fieldVal['type'] != 'nochange'){
+                    $workingFields[$key] = $fieldVal;
+                }
+            }
+           
+            //RETURN STRING
+            $returnFields = '';
+            foreach($workingFields as $name=>$value){
+                //SIZE MANIPULATION
+                $size = '';
+                $labelSize = '';
+                if(isset($value['size'])){
+                    $size = 'maxlength='.$value['size'];
+                    $labelSize = '&nbsp;&nbsp;&nbsp;<small>0/'.$value['size'].'</small>';
+                }
+                $returnFields .= "<div class='inputGroup'><label>".ucfirst($name).$labelSize."</label>";
+                if($value['type'] == 'simple'){
+                    
+                    if($value['input'] == 'textarea'){
+                        $add = '';
+                        if(isset($value['additional'])){
+                            $add = join(' ', $value['additional']);
+                        }
+                        $returnFields .= '<textarea class="'.$add.'" id="textarea'.ucfirst($name).'" name="'.$this->editPrefix.$name.'"></textarea>';
+
+                    }else{
+
+                        $returnFields .= '<input type="'.$value['input'].'" placeholder="..." '.$size.' name="'.$this->editPrefix.$name.'">';
+                    }
+                }else if($value['type'] == 'array'){
+                  
+                    
+                    $returnFields .= '<input type="text" class="tag" size="1" placeholder="..." name="'.$this->editPrefix.$name.'[]">';
+                
+                }else if($value['type'] == 'select'){
+                    global $admin;
+                    $returnFields .= '<select name="'.$this->editPrefix.$name.'">';
+                    $options = json_decode($admin->settings->get($value['data']));
+                    foreach ($options as $key => $option) {
+                        $returnFields .= '<option value="'.$option.'">'.$option.'</option>';
+                    }
+                    $returnFields .= '</select>';
+                   
+                }
+                $returnFields .= "</div>";
+            }
+            $returnFields .= "<input type='submit' value='Save'>";
+            return $returnFields;
+        }
+
+        function add($data){
+            $updateFields = array();
+            $updateData = array();
+          
+            foreach($data as $key=>$value){
+                if(count(explode($this->editPrefix, $key)) > 1){
+                    $s = explode($this->editPrefix, $key)[1];
+                    $updateFields[] = $s;
+                    if(is_array($value)){
+                        if(count(array_filter($value)) == 0){
+                            $updateData[] = json_encode(array());
+                        }else{
+                            $updateData[] = json_encode(array_filter($value));
+                        }
+                    }else{
+                        $updateData[] = $value;
+                    }
+
+                }
+            }
+            
+            $query = "insert into {$this->tableName}(";
+            $query .= implode(',', $updateFields).') values(';
+            foreach($updateFields as $key=>$val){
+               $query .= '?,';
+            }
+            $query = substr($query, 0, -1);
+            $query .= ')';
+            if($this->db->query($query, $updateData)){
+                return true;
+            }else{
+                return false;
+            }
+        }
+
+        function delete($id){
+            $q = "delete from {$this->tableName} where id=?";
+            if( $this->db->query($q,$id)){
+                return true;
+            }else{
+                return false;
             }
         }
     }

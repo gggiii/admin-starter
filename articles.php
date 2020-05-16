@@ -5,7 +5,11 @@
 ?>
 
 <div class="row">
-        <div class="col-10">
+    <div class="col-12">
+        <h2 class="section-heading">Articles</h2>
+        <a href="?action=add" class="btn btn-green">New</a>
+    </div>
+        <div class="col-9">
             <div class="card">
                <?php
                    print_r($admin->articles->getTable('id,title'));
@@ -33,7 +37,7 @@
                 -->
             </div>
         </div>
-        <div class="col-2">
+        <div class="col-3">
             <div class="card card-pad">
                 Lorem
             </div>
