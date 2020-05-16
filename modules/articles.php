@@ -1,15 +1,14 @@
 <?php
-    class Articles{
+
+use function PHPSTORM_META\type;
+
+class Articles{
         function __construct($db) {
             //DB
             $this->db = $db;  //mandatory database library
-            $this->usersTable = 'users';    //table with users
-            $this->authDuration = 300*60;    //login session duration
-            $this->defaultLoginPage = 'index.php';  //defaulat login page
-            $this->username = 'loginUsrnm'; 
             //SETUP
-            $this->tableName = 'articles';
-            $this->articlesPage = 'articles.php';
+            $this->tableName = 'articles'; //table name in database
+            $this->editPrefix = 'editTest';
             $this->tableSetup = array(
                 'id'=>array(
                     "type"=>'nochange'
@@ -31,12 +30,10 @@
                 ),
                 'tags'=>array(
                     "type"=>'array',
-                    "mode"=>'dynamic'
                 ),
                 'category'=>array(
-                    "type"=>'array',
-                    "mode"=>'static',
-                    "data"=>'myCats'
+                    "type"=>'select',
+                    "data"=>'article_categories'
                 ),
                 'excerpt'=>array(
                     "type"=>'simple',
@@ -45,7 +42,7 @@
                 )
             );
             $this->tableActions = '
-                <a href="?action=edit&id={{{id}}}" class="btn btn-blue">Action</a>
+                <a href="?action=edit&id={{{id}}}" class="btn btn-blue">Edit</a>
                 <a href="#" class="btn btn-red"">Action</a>
             ';
         }
@@ -137,20 +134,70 @@
                         if(isset($value['additional'])){
                             $add = join(' ', $value['additional']);
                         }
-                        $returnFields .= '<textarea class="'.$add.'" id="textarea'.ucfirst($name).'">'.$data[$name].'</textarea>';
+                        $returnFields .= '<textarea class="'.$add.'" id="textarea'.ucfirst($name).'" name="'.$this->editPrefix.$name.'">'.$data[$name].'</textarea>';
 
                     }else{
 
-                        $returnFields .= '<input type="'.$value['input'].'" placeholder="..." value="'.$data[$name].'" '.$size.'>';
+                        $returnFields .= '<input type="'.$value['input'].'" placeholder="..." value="'.$data[$name].'" '.$size.' name="'.$this->editPrefix.$name.'">';
                     }
                 }else if($value['type'] == 'array'){
-                    if($value['mode'] == 'dynamic'){
-                        $returnFields .= '<input type="text" class="tag" size="1" placeholder="...">';
+                  
+                    $tags = json_decode($data[$name]);
+                    foreach ($tags as $key => $tag) {
+                        $returnFields .= '<input type="text" class="tag" size="'.strlen($tag).'" placeholder="..." value="'.$tag.'" name="'.$this->editPrefix.$name.'[]">';
                     }
+                    $returnFields .= '<input type="text" class="tag" size="1" placeholder="..." name="'.$this->editPrefix.$name.'[]">';
+                
+                }else if($value['type'] == 'select'){
+                    global $admin;
+                    $returnFields .= '<select name="'.$this->editPrefix.$name.'">';
+                    $options = json_decode($admin->settings->get($value['data']));
+                    foreach ($options as $key => $option) {
+                        $returnFields .= '<option value="'.$option.'"'.(($option == $data[$name])?'selected':'').'>'.$option.'</option>';
+                    }
+                    $returnFields .= '</select>';
+                   
                 }
                 $returnFields .= "</div>";
             }
+            $returnFields .= "<input type='submit' value='Save'>";
             return $returnFields;
+        }
+
+        function update($id, $fields, $data){
+            $id = intval($id);
+            $updateFields = array();
+            $updateData = array();
+            if($fields == ''){
+                //UPDATE ALL
+                foreach($data as $key=>$value){
+                    if(count(explode($this->editPrefix, $key)) > 1){
+                        $s = explode($this->editPrefix, $key)[1];
+                        $updateFields[] = $s;
+                        if(is_array($value)){
+                            $updateData[] = json_encode(array_filter($value));
+                        }else{
+                            $updateData[] = $value;
+                        }
+
+                    }
+                }
+            }else{
+                $updateFields = explode(',', $fields);
+                foreach ($updateFields as $key => $value) {
+                    echo is_array($data[$this->editPrefix.$value]);
+                    $updateData[] = $data[$this->editPrefix.$value];
+                }
+            }
+            $query = "update {$this->tableName} set ";
+            foreach($updateFields as $key=>$val){
+                $query .= $val.'=?,';
+            }
+            $query = substr($query, 0, -1);
+            $query .= " where id={$id}";
+            if($this->db->query($query, $updateData)){
+                return true;
+            }
         }
     }
 ?>

@@ -16,6 +16,7 @@
             <ul>
                 <li><a href="home.php"><i class="fas fa-columns"></i>Dasboard</a></li>
                 <li><a href="articles.php"><i class="fas fa-th-list"></i>Articles</a></li>
+                <li><a href="settings.php"><i class="fas fa-cog"></i>Settings</a></li>
                 
             </ul>
         </nav>
