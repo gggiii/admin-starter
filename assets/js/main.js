@@ -61,3 +61,17 @@ function tagList(){
     }
 }
 tagList()
+
+
+//EDIT FILE OPEN FILE BROWSER
+let browserButtons = document.querySelectorAll('.openFiles')
+for (let i = 0; i < browserButtons.length; i++) {
+    const element = browserButtons[i];
+    element.onclick = e=>{
+        e.preventDefault();
+        let returnto = element.getAttribute('data-returnto')
+        window.open('selectBrowser.php?p=articles&returnto='+returnto,'_blank','width=400,height=800');
+        
+    }
+    
+}

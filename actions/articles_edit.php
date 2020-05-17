@@ -2,7 +2,7 @@
     if(count($_POST) > 0){
         $id = intval(htmlspecialchars($_GET['id']));
         if($admin->articles->update($id,'',$_POST) === true){
-            echo "Updated";
+            echo "<script>alert('Updated!')</script>";
         }else{
             echo 'Error updating';
         }

@@ -66,7 +66,7 @@
         APP
 
 */
-nav{
+body>nav{
     height: 100vh;
     width: 17%;
     /*background-color: rgb(44, 30, 44);*/
@@ -208,18 +208,18 @@ header .headerRight>li>a:hover svg path{
         SIDEBAR HIDDEN
 
 */
-.navHidden nav{
+.navHidden>nav{
     width: calc(2vw + 1rem + 0.4vw);
     overflow: hidden;
     white-space: nowrap;
 }
-.navHidden nav a{
+.navHidden>nav a{
     padding-left: 1vw;
 }
-.navHidden header{
+.navHidden>header{
     width: calc(100vw - 2vw - 1rem - 0.4vw);
 }
-.navHidden main{
+.navHidden>main{
     width: calc(100vw - 2vw - 1rem - 0.4vw);
 }
 /*
@@ -238,11 +238,11 @@ header .headerRight>li>a:hover svg path{
     margin-bottom: 1vw;
     color: var(--even-darker-border-color);
 }
-.table{
+.card>.table{
     border-collapse: collapse;
     width: 100%;
 }
-.table th{
+.card>.table th{
     border-bottom: 1px solid var(--darker-border-color);
     color: white;
     background-color: var(--accent);
@@ -250,20 +250,24 @@ header .headerRight>li>a:hover svg path{
     text-align: right;
     text-transform: uppercase;
 }
-.table th:first-child{
+.table th{
+    background-color: var(--accent);
+    color: white;
+}
+.card>.table th:first-child{
     text-align: left;
 }
-.table tr{
+.card>.table tr{
     border-bottom: 1px solid var(--border-color);
 }
-.table tr:last-child{
+.card>.table tr:last-child{
     border-bottom: none;
 }
-.table td{
+.card>.table td{
     padding: 15px 20px;
     text-align: right;
 }
-.table td:first-child{
+.card>.table td:first-child{
     text-align: left;
 }
 .btn{

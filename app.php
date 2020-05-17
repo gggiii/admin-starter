@@ -3,6 +3,7 @@
         public function __construct() {
             //SETUP
             $this->appHomepage = 'home.php';
+            $this->lang = 
             //HEADERS
             //header('Content-Security-Policy: default-src https://scotthelme.co.uk:*');
             header("X-Frame-Options: SAMEORIGIN");

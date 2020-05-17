@@ -10,6 +10,7 @@ class Articles{
             $this->tableName = 'articles'; //table name in database
             $this->editPrefix = 'editTest';
             $this->articlesPage = 'articles.php';
+            $this->articlesImgFolder = 'articles';
             $this->tableSetup = array(
                 'id'=>array(
                     "type"=>'nochange'
@@ -34,10 +35,9 @@ class Articles{
                     "type"=>'select',
                     "data"=>'article_categories'
                 ),
-                'excerpt'=>array(
+                'file'=>array(
                     "type"=>'simple',
-                    "input"=>'text',
-                    "size"=>200
+                    "input"=>'file'
                 )
             );
             $this->tableActions = '
@@ -135,6 +135,9 @@ class Articles{
                         }
                         $returnFields .= '<textarea class="'.$add.'" id="textarea'.ucfirst($name).'" name="'.$this->editPrefix.$name.'">'.$data[$name].'</textarea>';
 
+                    }else if($value['input'] == 'file'){
+                        $returnFields .= '<button class="openFiles" data-returnto="'.$this->editPrefix.$name.'">Choose file</button>';
+                        $returnFields .= '<input type="text" placeholder="..." name="'.$this->editPrefix.$name.'" value="'.$data[$name].'">';
                     }else{
 
                         $returnFields .= '<input type="'.$value['input'].'" placeholder="..." value="'.$data[$name].'" '.$size.' name="'.$this->editPrefix.$name.'">';
@@ -229,6 +232,9 @@ class Articles{
                         }
                         $returnFields .= '<textarea class="'.$add.'" id="textarea'.ucfirst($name).'" name="'.$this->editPrefix.$name.'"></textarea>';
 
+                    }else if($value['input'] == 'file'){
+                        $returnFields .= '<button class="openFiles" data-returnto="'.$this->editPrefix.$name.'">Choose file</button>';
+                        $returnFields .= '<input type="text" placeholder="..." name="'.$this->editPrefix.$name.'">';
                     }else{
 
                         $returnFields .= '<input type="'.$value['input'].'" placeholder="..." '.$size.' name="'.$this->editPrefix.$name.'">';
