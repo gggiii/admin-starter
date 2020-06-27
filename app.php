@@ -1,13 +1,7 @@
 <?php
     class Admin{
         public function __construct() {
-            //SETUP
-            $this->appHomepage = 'home.php';
-            $this->lang = 
-            //HEADERS
-            //header('Content-Security-Policy: default-src https://scotthelme.co.uk:*');
-            header("X-Frame-Options: SAMEORIGIN");
-            header("X-XSS-Protection: 1; mode=block");
+            
 
             //DATABASE
             include('db.php');
@@ -29,6 +23,8 @@
             session_start();
            
         }
+        
     }
+    
     
 ?>
