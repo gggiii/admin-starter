@@ -1,33 +1,57 @@
 <?php
     class Auth{
         function __construct($db) {
-            //SETUP
-            $this->db = $db;  //mandatory database library
-            $this->usersTable = 'users';    //table with users
-            $this->authDuration = 300*60;    //login session duration
-            $this->defaultLoginPage = 'index.php';  //defaulat login page
-            $this->username = 'loginUsrnm'; 
+            
+            $this->db = $db;
+            $this->usersTable = 'users';
+            $this->sessionName = 'adminLogin';
+            $this->multipleSessions = false;
+
+
         }
 
         function login($username, $password){
-            $user = $this->db->query("select id,password from ".$this->usersTable." where username = ?", $username)->fetchArray();
-            if(!$user){
-                return false;
+            
+            $users = $this->db->query('SELECT * FROM ' . $this->usersTable . ' WHERE USERNAME=?', $username)->fetchAll();
+            if( count($users) == 0){
+                return array(
+                    'error'=> 'no-user',
+                    'message' => 'User does not exist'
+                );
             }else{
-
-                print_r($user);
-                $hash = $user['password'];
-                if(password_verify($password, $hash)){
-                    $_SESSION[$this->username] = $username;
-                    $sessionId = session_id();
-                    $ip = $_SERVER["REMOTE_ADDR"];
-                    if($this->db->query("update ".$this->usersTable." set session=?, ip=?, lastVerified=now()", $sessionId, $ip)){
-                        return true;
-                    }
+                if( ! password_verify($password,$users[0]['password']) ){
+                    return array(
+                        'error'=> 'wrong-pass',
+                        'message' => 'Wrong user password'
+                    );
                 }else{
-                    return false;
+                    if($this->multipleSessions){
+                        //TODO:Add functionality
+                    }else{
+
+                        if( $users[0]['hash'] == ''){
+                            $newHash = md5($_COOKIE['PHPSESSID'].$_SERVER['HTTP_USER_AGENT']);
+                            $this->db->query('UPDATE ' . $this->usersTable . ' SET hash=?,lastVerified=now() WHERE id=?', $newHash, $users[0]['id']);
+
+                            $_SESSION[$this->sessionName] = $users[0]['id'];
+                            return true;
+                        }else{
+                            if(md5($_COOKIE['PHPSESSID'].$_SERVER['HTTP_USER_AGENT']) == $users[0]['hash']){
+                                $this->db->query('UPDATE ' . $this->usersTable . ' SET lastVerified=now() WHERE id=?', $users[0]['id']);
+                                return true;
+                            }else{
+                                return array(
+                                    'error'=> 'sesssion-allready-running',
+                                    'message' => 'Another user session is allready running'
+                                );
+                            }
+                            
+                        }
+                    }
+                    
                 }
             }
+
         }
 
         

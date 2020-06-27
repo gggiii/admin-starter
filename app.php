@@ -2,6 +2,7 @@
     class Admin{
         public function __construct() {
             
+            $this->language = 0;
 
             //DATABASE
             include('db.php');
@@ -21,7 +22,9 @@
 
             //SESSION
             session_start();
-           
+        }
+        public function text($options){
+            return $options[$this->language];
         }
         
     }
