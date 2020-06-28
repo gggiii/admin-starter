@@ -1,24 +1,89 @@
 <?php
+
+/**
+ * Custom PHP class for secure authentication of users
+ * @author Patrik Krivulčík
+ */
+
 class Auth
 {
+    /**
+     * Class constructor
+     * @param db $db Cusomtom mysql database module
+     */
+
+    protected $db, $usersTable, $settingsTable;
+    protected $sessionUserId, $sessionUserData, $sessionExpiration, $multipleSessions, $overrideUserSession;
+    protected $encryptionKey, $encryptionMethod, $encryptionIV;
+
     function __construct($db)
     {
-
+        /**
+         * Custom mysql database module
+         * @var db
+         */
         $this->db = $db;
+        /**
+         * Table name in which users are stored
+         * @var string
+         */
         $this->usersTable = 'users';
+        /**
+         * Table name in which settings are stored
+         * @var string
+         */
         $this->settingsTable = 'settings';
-
+        /**
+         * Session name for storing user id
+         * @var string
+         */
         $this->sessionUserId = 'adminLoginId';
+        /**
+         * Session name for storing openssl encrypted data from the user table
+         * @var string
+         */
         $this->sessionUserData = 'adminData';
-        $this->sessionExpiration = 2000; //seconds
+        /**
+         * Number of seconds after which the user session expires
+         * @var integer
+         */
+        $this->sessionExpiration = 2000;
+        /**
+         * Wheter more than 1 users can be logged in as one user at the same time
+         * @var bool
+         */
         $this->multipleSessions = false;
+        /**
+         * Ony if multipleSessions is false.
+         * Whether a new login attemt will override current login sessions
+         * @var string
+         */
         $this->overrideUserSession = false;
 
+        /**
+         * Encryption key for encrypting sessionUserData
+         * @var string
+         */
         $this->encryptionKey = 'mykey123';
+        /**
+         * Encryption method for encrypting sessionUserData
+         * @var string
+         */
         $this->encryptionMethod = 'aes-128-cbc-hmac-sha256';
+        /**
+         * Encryption IV for encrypting sessionUserData
+         * @var string
+         */
         $this->encryptionIV = hex2bin('422d7aded49d32115968698bb5fb0f9a');
     }
 
+    /**
+     * Login function
+     * 
+     * @param string $username
+     * @param string $password
+     * @return true or cusom error on fail
+     */
     public function login($username, $password)
     {
 
@@ -61,15 +126,23 @@ class Auth
             }
         }
     }
-
+    /**
+     * Logout function function
+     * @return true
+     */
     public function logout()
     {
-        // unset($_SESSION[$this->sessionUserId]);
-        $_SESSION[$this->sessionUserId] = '';
+        unset($_SESSION[$this->sessionUserId]);
+        // $_SESSION[$this->sessionUserId] = '';
         return true;
     }
-
-    public function validateLogin($checkExpired = false)
+    /**
+     * Validates current login session
+     * 
+     * @param bool $checkExpired whether the expiration time should be checked
+     * @return bool whether login session is valid  or cusom error message
+     */
+    public function validateLogin($checkExpired = true)
     {
         if (!isset($_SESSION[$this->sessionUserId])) {
             return false;
@@ -92,7 +165,11 @@ class Auth
     }
 
 
-
+/**
+     * Get user role
+     * 
+     * @return string user role
+     */
     public function getRole()
     {
         if ($this->validateLogin(true)) {
@@ -106,6 +183,11 @@ class Auth
             );
         }
     }
+    /**
+     * Get user permissions
+     * 
+     * @return array user permissions
+     */
     public function getPermissions()
     {
         if ($this->validateLogin(true)) {
@@ -131,6 +213,11 @@ class Auth
             );
         }
     }
+    /**
+     * Get username
+     * 
+     * @return string username
+     */
     public function getUsername()
     {
         if ($this->validateLogin(true)) {
@@ -144,6 +231,11 @@ class Auth
             );
         }
     }
+    /**
+     * Get user id
+     * 
+     * @return string id
+     */
     public function getId()
     {
         if ($this->validateLogin(true)) {
