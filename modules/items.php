@@ -12,14 +12,14 @@ class Items
         $this->itemsTable = 'items';
         $this->fields = array(
             'name' => array(
-                'type' => 'simple-text'
+                'type' => 'simple-text',
+                'maxlength' => '20'
             ),
-            'text' => array(
-                'type' => 'textarea'
-            ),
-            'number' => array(
-                'type' => 'simple-number'
-            ),
+            'file' => array(
+                'type' => 'file',
+                'accept' => 'image/*',
+                'uploadPath'=> './uploads/'
+            )
         );
         $this->newFieldPrefix = 'new-';
     }
@@ -36,38 +36,45 @@ class Items
             return $this->db->query('SELECT * FROM ' . $this->itemsTable . ' WHERE id=?', $id)->fetchArray();
         }
     }
-    public function add($post)
+    public function add($post ,$files = false)
     {
-        if (count($post) != count($this->fields)) {
-            return array(
-                'error' => 'wrong-parameters-count',
-                'message' => 'Number of fields in parameter does not match required number of pparamters'
-            );
-        } else {
-            $keys = array_keys($post);
-            $query = 'INSERT INTO ' . $this->itemsTable . '(';
-            $values = ' VALUES(';
-            $valuesActual = array();
-            for ($i = 0; $i < count($keys); $i++) {
-                $key = $keys[$i];
-                if (strpos($key, $this->newFieldPrefix) === false) {
-                    return array(
-                        'error' => 'wrong-fields-format',
-                        'message' => 'Some fields do not contain the correct newFieldPrefix'
-                    );
-                } else {
+
+        $keys = array_keys($post);
+        $query = 'INSERT INTO ' . $this->itemsTable . '(';
+        $values = ' VALUES(';
+        $valuesActual = array();
+        for ($i = 0; $i < count($keys); $i++) {
+            $key = $keys[$i];
+            if (strpos($key, $this->newFieldPrefix) === false) {
+                return array(
+                    'error' => 'wrong-fields-format',
+                    'message' => 'Some fields do not contain the correct newFieldPrefix'
+                );
+            } else {
                     $query .= explode($this->newFieldPrefix, $key)[1] . ',';
                     $values .= '?,';
                     $valuesActual[] = $post[$key];
                 }
-            }
-            $query = rtrim($query, ' ,') . ')';
-            $values = rtrim($values, ' ,') . ')';
-            $query = $query . $values;
-
-            $this->db->query($query, $valuesActual);
-            return true;
+            
         }
+        if($files !== false){
+            for ($i=0; $i < count($files); $i++) { 
+                $file = $files[array_keys($files)[$i]];
+                if(move_uploaded_file($file['tmp_name'],
+                $this->fields[explode($this->newFieldPrefix, array_keys($files)[$i])[1]]['uploadPath'] . $file['name'])){
+
+                    $query .= explode($this->newFieldPrefix, array_keys($files)[$i])[1] . ',';
+                    $values .= '?,';
+                    $valuesActual[] = $file['name'];
+                }
+            }
+        }
+        $query = rtrim($query, ' ,') . ')';
+        $values = rtrim($values, ' ,') . ')';
+        $query = $query . $values;
+
+        $this->db->query($query, $valuesActual);
+        return true;
     }
 
     public function getNewField($fieldIdentifier, $placeholder = false)
@@ -88,14 +95,42 @@ class Items
         $output = '';
         switch ($field['type']) {
             case 'simple-text':
-                $output = '<input type="text" name="' . $this->newFieldPrefix . $fieldName . '"id="' . $this->newFieldPrefix . $fieldName . '" placeholder="' . (($placeholder !== false) ? $placeholder : '') . '">';
+                $maxlength = (isset($field['maxlength'])) ? 'maxlength="' . $field['maxlength'] . '"' : '';
+                $output = '<input type="text" name="' . $this->newFieldPrefix . $fieldName . '"id="' . $this->newFieldPrefix . $fieldName . '" placeholder="' . (($placeholder !== false) ? $placeholder : '') . '" ' . $maxlength . '>';
                 break;
+
+
             case 'simple-number':
                 $output = '<input type="number" name="' . $this->newFieldPrefix . $fieldName . '"id="' . $this->newFieldPrefix . $fieldName . '" placeholder="' . (($placeholder !== false) ? $placeholder : '') . '">';
                 break;
+
+
             case 'textarea':
                 $output = '<textarea name="' . $this->newFieldPrefix . $fieldName . '"id="' . $this->newFieldPrefix . $fieldName . '" placeholder="' . (($placeholder !== false) ? $placeholder : '') . '"></textarea>';
                 break;
+
+
+            case 'ckeditor':
+                $output = '<textarea class="ckeditor" name="' . $this->newFieldPrefix . $fieldName . '"id="' . $this->newFieldPrefix . $fieldName . '" placeholder="' . (($placeholder !== false) ? $placeholder : '') . '"></textarea>';
+                break;
+
+
+            case 'select':
+                $output = '<select name="' . $this->newFieldPrefix . $fieldName . '"id="' . $this->newFieldPrefix . $fieldName . '" >';
+                for ($i = 0; $i < count($field['options']); $i++) {
+                    $option = $field['options'][$i];
+                    $output .= '<option value="' . $option . '">' . $option . '</option>';
+                }
+                $output .= '</select>';
+                break;
+
+
+            case 'file':
+                $accept  = (isset($field['accept'])) ? 'accept="' . $field['accept'] . '"' : '';
+                $output = '<input type="file" name="' . $this->newFieldPrefix . $fieldName . '"id="' . $this->newFieldPrefix . $fieldName . '" ' . $accept . '>';
+                break;
+
+
             default:
                 # code...
                 break;
