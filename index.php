@@ -2,7 +2,7 @@
 <?php
 include 'app.php';
 $app = new Admin();
-print_r($app->items->getNewField('number'));
+print_r($app->items->getNewField('text','asdasd'));
 
 
 ?>

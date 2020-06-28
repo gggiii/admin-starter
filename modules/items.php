@@ -72,15 +72,15 @@ class Items
 
     public function getNewField($fieldIdentifier, $placeholder = false)
     {
-        if(is_int($fieldIdentifier)){
+        if (is_int($fieldIdentifier)) {
             $fieldName = array_keys($this->fields)[$fieldIdentifier];
-        }else{
-            if(!isset($this->fields[$fieldIdentifier])){
+        } else {
+            if (!isset($this->fields[$fieldIdentifier])) {
                 return array(
                     'error' => 'no-field',
                     'message' => 'No such field exists'
                 );
-            }else{
+            } else {
                 $fieldName = $fieldIdentifier;
             }
         }
@@ -92,6 +92,9 @@ class Items
                 break;
             case 'simple-number':
                 $output = '<input type="number" name="' . $this->newFieldPrefix . $fieldName . '"id="' . $this->newFieldPrefix . $fieldName . '" placeholder="' . (($placeholder !== false) ? $placeholder : '') . '">';
+                break;
+            case 'textarea':
+                $output = '<textarea name="' . $this->newFieldPrefix . $fieldName . '"id="' . $this->newFieldPrefix . $fieldName . '" placeholder="' . (($placeholder !== false) ? $placeholder : '') . '"></textarea>';
                 break;
             default:
                 # code...
