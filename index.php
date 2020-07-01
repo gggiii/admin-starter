@@ -10,7 +10,7 @@ if(count($_FILES) > 0){
 ?>
 <form action="#" method="POST" enctype="multipart/form-data">
 <?php
-    echo $app->items->getNewField('file')
+    echo $app->items->getEditField(1,'name', false,'asd');
 ?>
 <input type="submit">
 </form>

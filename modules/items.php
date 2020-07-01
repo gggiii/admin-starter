@@ -5,6 +5,7 @@ class Items
     protected $db, $itemsTable;
     protected $fields;
     protected $newFieldPrefix;
+    protected $editFieldPrefix;
 
     public function __construct($db)
     {
@@ -22,6 +23,7 @@ class Items
             )
         );
         $this->newFieldPrefix = 'new-';
+        $this->editFieldPrefix = 'edit-';
     }
     public function getAll($id = false)
     {
@@ -96,7 +98,7 @@ class Items
         switch ($field['type']) {
             case 'simple-text':
                 $maxlength = (isset($field['maxlength'])) ? 'maxlength="' . $field['maxlength'] . '"' : '';
-                $output = '<input type="text" name="' . $this->newFieldPrefix . $fieldName . '"id="' . $this->newFieldPrefix . $fieldName . '" placeholder="' . (($placeholder !== false) ? $placeholder : '') . '" ' . $maxlength . '>';
+                $output = '<input type="text" name="' . $this->newFieldPrefix . $fieldName . '"id="' . $this->newFieldPrefix . $fieldName . '" placeholder="' . (($placeholder !== false) ? $placeholder : '') . '" ' . $maxlength . ' >';
                 break;
 
 
@@ -106,17 +108,17 @@ class Items
 
 
             case 'textarea':
-                $output = '<textarea name="' . $this->newFieldPrefix . $fieldName . '"id="' . $this->newFieldPrefix . $fieldName . '" placeholder="' . (($placeholder !== false) ? $placeholder : '') . '"></textarea>';
+                $output = '<textarea name="' . $this->newFieldPrefix . $fieldName . '"id="' . $this->newFieldPrefix . $fieldName . '" placeholder="' . (($placeholder !== false) ? $placeholder : '') . '" ></textarea>';
                 break;
 
 
             case 'ckeditor':
-                $output = '<textarea class="ckeditor" name="' . $this->newFieldPrefix . $fieldName . '"id="' . $this->newFieldPrefix . $fieldName . '" placeholder="' . (($placeholder !== false) ? $placeholder : '') . '"></textarea>';
+                $output = '<textarea class="ckeditor" name="' . $this->newFieldPrefix . $fieldName . '"id="' . $this->newFieldPrefix . $fieldName . '" placeholder="' . (($placeholder !== false) ? $placeholder : '') . '" ></textarea>';
                 break;
 
 
             case 'select':
-                $output = '<select name="' . $this->newFieldPrefix . $fieldName . '"id="' . $this->newFieldPrefix . $fieldName . '" >';
+                $output = '<select name="' . $this->newFieldPrefix . $fieldName . '"id="' . $this->newFieldPrefix . $fieldName . '"  >';
                 for ($i = 0; $i < count($field['options']); $i++) {
                     $option = $field['options'][$i];
                     $output .= '<option value="' . $option . '">' . $option . '</option>';
@@ -137,4 +139,65 @@ class Items
         }
         return $output;
     }
+
+    public function getEditField($id,$fieldIdentifier, $placeholder = false, $value = false)
+        {
+            if (is_int($fieldIdentifier)) {
+                $fieldName = array_keys($this->fields)[$fieldIdentifier];
+            } else {
+                if (!isset($this->fields[$fieldIdentifier])) {
+                    return array(
+                        'error' => 'no-field',
+                        'message' => 'No such field exists'
+                    );
+                } else {
+                    $fieldName = $fieldIdentifier;
+                }
+            }
+            $field = $this->fields[$fieldName];
+            $output = '';
+            switch ($field['type']) {
+                case 'simple-text':
+                    $maxlength = (isset($field['maxlength'])) ? 'maxlength="' . $field['maxlength'] . '"' : '';
+                    $output = '<input type="text" name="' . $this->editFieldPrefix . $fieldName . '"id="' . $this->editFieldPrefix . $fieldName . '" placeholder="' . (($placeholder !== false) ? $placeholder : '') . '" ' . $maxlength . '  value="' . (($value !== false) ? $value : '') . '">';
+                    break;
+    
+    
+                case 'simple-number':
+                    $output = '<input type="number" name="' . $this->editFieldPrefix . $fieldName . '"id="' . $this->editFieldPrefix . $fieldName . '" placeholder="' . (($placeholder !== false) ? $placeholder : '') . '" value="' . (($value !== false) ? $value : '') . '">';
+                    break;
+    
+    
+                case 'textarea':
+                    $output = '<textarea name="' . $this->editFieldPrefix . $fieldName . '"id="' . $this->editFieldPrefix . $fieldName . '" placeholder="' . (($placeholder !== false) ? $placeholder : '') . '" value="' . (($value !== false) ? $value : '') . '"></textarea>';
+                    break;
+    
+    
+                case 'ckeditor':
+                    $output = '<textarea class="ckeditor" name="' . $this->editFieldPrefix . $fieldName . '"id="' . $this->editFieldPrefix . $fieldName . '" placeholder="' . (($placeholder !== false) ? $placeholder : '') . '"  value="' . (($value !== false) ? $value : '') . '"></textarea>';
+                    break;
+    
+    
+                case 'select':
+                    $output = '<select name="' . $this->editFieldPrefix . $fieldName . '"id="' . $this->editFieldPrefix . $fieldName . '"  value="' . (($value !== false) ? $value : '') . '">';
+                    for ($i = 0; $i < count($field['options']); $i++) {
+                        $option = $field['options'][$i];
+                        $output .= '<option value="' . $option . '">' . $option . '</option>';
+                    }
+                    $output .= '</select>';
+                    break;
+    
+    
+                case 'file':
+                    $accept  = (isset($field['accept'])) ? 'accept="' . $field['accept'] . '"' : '';
+                    $output = '<input type="file" name="' . $this->editFieldPrefix . $fieldName . '"id="' . $this->editFieldPrefix . $fieldName . '" ' . $accept . '>';
+                    break;
+    
+    
+                default:
+                    # code...
+                    break;
+            }
+            return $output;
+        }
 }
